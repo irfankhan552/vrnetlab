@@ -45,6 +45,26 @@ class VQFX_vcp(vrnetlab.VM):
 
 
     def start(self):
+
+        for i in range(10):
+            net = "net%d" % (i+1)
+            tap = "tap%d" % i
+            bridge = "%s_%s" % (net, tap)
+
+            vrnetlab.run_command(["ip", "link", "add", bridge, "type", "bridge"])
+
+            vrnetlab.run_command(["ip", "addr", "flush", "dev", net])
+
+            vrnetlab.run_command(["ip", "link", "set", net, "master", bridge])
+
+            vrnetlab.run_command(["ip", "tuntap", "add", "dev", tap, "mode", "tap"])
+            # vrnetlab.run_command(["ip", "link", "set", tap, "promisc", "on"])
+
+            vrnetlab.run_command(["ip", "link", "set", tap, "master", bridge])
+
+            vrnetlab.run_command(["ip", "link", "set", bridge, "up"])
+            vrnetlab.run_command(["ip", "link", "set", tap, "up"])
+
         # use parent class start() function
         super(VQFX_vcp, self).start()
         # add interface to internal control plane bridge
@@ -123,6 +143,7 @@ class VQFX_vcp(vrnetlab.VM):
         """
         self.wait_write("cli", None)
         self.wait_write("configure", '>', 10)
+        self.wait_write("set system hostname %s" % os.environ['VQFX_HOSTNAME'])
         self.wait_write("set system services ssh")
         self.wait_write("set system services netconf ssh")
         self.wait_write("set system services netconf rfc-compliant")
@@ -190,7 +211,6 @@ class VQFX_vpfe(vrnetlab.VM):
         # add interface to internal control plane bridge
         vrnetlab.run_command(["brctl", "addif", "int_cp", "vpfe-int"])
         vrnetlab.run_command(["ip", "link", "set", "vpfe-int", "up"])
-
 
 
     def bootstrap_spin(self):

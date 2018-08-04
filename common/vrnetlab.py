@@ -176,6 +176,7 @@ class VM:
             range_start = 2
         else:
             range_start = 1
+
         for i in range(range_start, self.num_nics+1):
             # calc which PCI bus we are on and the local add on that PCI bus
             pci_bus = math.floor(i/self.nics_per_pci_bus) + 1
@@ -190,8 +191,8 @@ class VM:
                        'mac': gen_mac(i)
                     })
             res.append("-netdev")
-            res.append("socket,id=p%(i)02d,listen=:100%(i)02d"
-                       % { 'i': i })
+            res.append("tap,id=p%(i)02d,ifname=tap%(iminus)01d,script=no,downscript=no"
+                        % { 'i': i, 'iminus': (i-1)})
         return res
 
 

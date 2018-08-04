@@ -9,6 +9,8 @@ RUN apt-get update -qy \
     bridge-utils \
     iproute2 \
     python3-ipy \
+    tcpdump \
+    htop \
     socat \
     qemu-kvm \
  && rm -rf /var/lib/apt/lists/*
